@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT Audio • Downloader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#fafafa] dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-xl mx-auto">
+        <!-- Ultra Modern Header -->
+        <div class="text-center mb-10 space-y-3">
+            <div class="inline-flex items-center justify-center p-2 rounded-full bg-red-50 dark:bg-red-900/20 mb-4">
+                <i class="fab fa-youtube text-red-500 text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                YouTube Audio Downloader
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Simple • Fast • High Quality</p>
+        </div>
+        
+        <!-- Main Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg shadow-black/5 p-6 mb-6">
+            <!-- Search Input -->
+            <div class="relative mb-6 group">
+                <input type="text" id="youtubeUrl" 
+                       placeholder="Paste YouTube URL here" 
+                       class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500">
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none transition-transform group-focus-within:scale-110">
+                    <i class="fas fa-link text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                </div>
+            </div>
+
+            <!-- Search Button -->
+            <button onclick="getVideoInfo()" 
+                    class="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:ring-offset-gray-800">
+                <i class="fas fa-search text-sm"></i>
+                <span>Get Video Info</span>
+            </button>
+        </div>
+
+        <!-- Video Info Card -->
+        <div id="videoInfo" class="hidden animate-fade-in">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg shadow-black/5 overflow-hidden mb-6">
+                <!-- Thumbnail Container with Gradient Overlay -->
+                <div id="thumbnailContainer" class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+                </div>
+                
+                <!-- Video Details -->
+                <div class="p-6 space-y-4">
+                    <h2 id="videoTitle" class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2"></h2>
+                    
+                    <div class="space-y-2">
+                        <div id="channelName" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-user-circle mr-2 text-blue-500"></i>
+                            <span></span>
+                        </div>
+                        <div id="duration" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-clock mr-2 text-blue-500"></i>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button onclick="downloadAudio()" 
+                            class="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 dark:ring-offset-gray-800 mt-4">
+                        <i class="fas fa-download text-sm"></i>
+                        <span>Download MP3</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        function showLoading(message) {
+            return Swal.fire({
+                html: `
+                    <div class="space-y-3">
+                        <div class="w-16 h-16 mx-auto border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                        <div class="text-gray-600 text-sm">${message}</div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                background: '#ffffff',
+                customClass: {
+                    popup: 'rounded-2xl'
+                }
+            });
+        }
+
+        function showSuccess(message) {
+            Toast.fire({
+                icon: 'success',
+                title: message,
+                background: '#F0FDF4',
+                iconColor: '#22C55E'
+            });
+        }
+
+        function showError(message) {
+            Toast.fire({
+                icon: 'error',
+                title: message,
+                background: '#FEF2F2',
+                iconColor: '#EF4444'
+            });
+        }
+
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function getVideoInfo() {
+            const url = $('#youtubeUrl').val().trim();
+            if (!url) {
+                showError('Please enter a YouTube URL');
+                return;
+            }
+
+            showLoading('Fetching video information...');
+            $('#videoInfo').addClass('hidden');
+
+            $.ajax({
+                url: 'https://api.siputzx.my.id/api/ytdl/get-info',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ url: url }),
+                success: function(response) {
+                    $('#thumbnailContainer').html(`
+                        <img src="${response.thumbnail}" alt="Video thumbnail" 
+                             class="w-full object-cover transition-transform duration-300 hover:scale-105">
+                    `);
+                    $('#videoTitle').text(response.title);
+                    $('#channelName span').text(response.channel);
+                    $('#duration span').text(formatDuration(response.duration));
+                    $('#videoInfo').removeClass('hidden');
+                    Swal.close();
+                    showSuccess('Video information retrieved');
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    showError(xhr.responseJSON?.error || 'Failed to get video information');
+                }
+            });
+        }
+
+        function downloadAudio() {
+            const url = $('#youtubeUrl').val().trim();
+            if (!url) {
+                showError('Please enter a YouTube URL');
+                return;
+            }
+
+            showLoading('Preparing your download...');
+
+            $.ajax({
+                url: 'https://api.siputzx.my.id/api/ytdl/download',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ url: url }),
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response) {
+                    const blob = new Blob([response], { type: 'audio/mp3' });
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = downloadUrl;
+                    a.download = $('#videoTitle').text() + '.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    Swal.close();
+                    showSuccess('Download started');
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    showError('Download failed');
+                }
+            });
+        }
+
+        // Smooth page load animation
+        document.addEventListener('DOMContentLoaded', () => {
+            requestAnimationFrame(() => {
+                document.body.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    document.body.style.transition = 'opacity 0.5s ease-in';
+                    document.body.style.opacity = '1';
+                });
+            });
+        });
+
+        // Check system dark mode preference
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+</body>
+</html>
