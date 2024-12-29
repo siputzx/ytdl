@@ -3,80 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Audio • Downloader</title>
+    <title>YT Audio Downloader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 8s ease infinite;
+        }
+        .loading-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: .5;
+                transform: scale(0.95);
+            }
+        }
+    </style>
 </head>
-<body class="bg-[#fafafa] dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-xl mx-auto">
-        <!-- Ultra Modern Header -->
-        <div class="text-center mb-10 space-y-3">
-            <div class="inline-flex items-center justify-center p-2 rounded-full bg-red-50 dark:bg-red-900/20 mb-4">
-                <i class="fab fa-youtube text-red-500 text-3xl"></i>
-            </div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                YouTube Audio Downloader
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Simple • Fast • High Quality</p>
-        </div>
-        
-        <!-- Main Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg shadow-black/5 p-6 mb-6">
-            <!-- Search Input -->
-            <div class="relative mb-6 group">
-                <input type="text" id="youtubeUrl" 
-                       placeholder="Paste YouTube URL here" 
-                       class="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500">
-                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none transition-transform group-focus-within:scale-110">
-                    <i class="fas fa-link text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
-                </div>
-            </div>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <!-- Theme Toggle -->
+    <div class="fixed top-4 right-4">
+        <button id="themeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <i class="fas fa-sun text-yellow-500 dark:hidden group-hover:rotate-90 transition-transform duration-500"></i>
+            <i class="fas fa-moon text-blue-400 hidden dark:inline group-hover:-rotate-90 transition-transform duration-500"></i>
+        </button>
+    </div>
 
-            <!-- Search Button -->
-            <button onclick="getVideoInfo()" 
-                    class="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:ring-offset-gray-800">
-                <i class="fas fa-search text-sm"></i>
-                <span>Get Video Info</span>
-            </button>
-        </div>
-
-        <!-- Video Info Card -->
-        <div id="videoInfo" class="hidden animate-fade-in">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg shadow-black/5 overflow-hidden mb-6">
-                <!-- Thumbnail Container with Gradient Overlay -->
-                <div id="thumbnailContainer" class="relative">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-                </div>
-                
-                <!-- Video Details -->
-                <div class="p-6 space-y-4">
-                    <h2 id="videoTitle" class="text-xl font-semibold text-gray-800 dark:text-white line-clamp-2"></h2>
-                    
-                    <div class="space-y-2">
-                        <div id="channelName" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <i class="fas fa-user-circle mr-2 text-blue-500"></i>
-                            <span></span>
-                        </div>
-                        <div id="duration" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <i class="fas fa-clock mr-2 text-blue-500"></i>
-                            <span></span>
-                        </div>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-xl mx-auto space-y-8">
+            <!-- Modern Header -->
+            <div class="text-center space-y-6">
+                <div class="relative inline-flex">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 blur-xl opacity-20 rounded-full animate-gradient"></div>
+                    <div class="relative p-4 rounded-full bg-white dark:bg-gray-800 shadow-lg group hover:shadow-xl transition-all duration-500">
+                        <i class="fab fa-youtube text-red-500 text-4xl group-hover:scale-110 transition-transform duration-500"></i>
                     </div>
+                </div>
+                <h1 class="text-5xl font-bold font-display bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient">
+                    Audio Downloader
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-sm tracking-wider uppercase font-light">Elegant • Minimal • Modern</p>
+            </div>
+            
+            <!-- Main Input Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 transform hover:scale-[1.02] transition-all duration-500">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                    <input type="text" id="youtubeUrl" 
+                           placeholder="Paste YouTube URL here" 
+                           class="w-full pl-12 pr-4 py-5 bg-gray-50 dark:bg-gray-900/50 border-0 rounded-xl focus:ring-2 focus:ring-purple-500/50 transition-all duration-300 text-gray-700 dark:text-gray-200 placeholder-gray-400 relative z-10 font-light">
+                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none z-20">
+                        <i class="fas fa-link text-gray-400 group-hover:text-purple-500 transition-colors duration-500"></i>
+                    </div>
+                </div>
 
-                    <!-- Download Button -->
-                    <button onclick="downloadAudio()" 
-                            class="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 dark:ring-offset-gray-800 mt-4">
-                        <i class="fas fa-download text-sm"></i>
-                        <span>Download MP3</span>
-                    </button>
+                <button onclick="getVideoInfo()" 
+                        class="w-full mt-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white py-5 px-6 rounded-xl transition-all duration-500 flex items-center justify-center space-x-3 font-medium shadow-lg hover:shadow-xl focus:ring-2 focus:ring-purple-500/50 animate-gradient">
+                    <i class="fas fa-search text-sm"></i>
+                    <span class="font-display tracking-wide">Get Audio Info</span>
+                </button>
+            </div>
+
+            <!-- Video Info Card -->
+            <div id="videoInfo" class="hidden animate-fade-in">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-500">
+                    <div id="thumbnailContainer" class="relative aspect-video">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent z-10"></div>
+                    </div>
+                    
+                    <div class="p-8 space-y-6">
+                        <h2 id="videoTitle" class="text-2xl font-display font-medium text-gray-800 dark:text-white line-clamp-2"></h2>
+                        
+                        <div class="flex flex-wrap gap-6">
+                            <div id="channelName" class="flex items-center text-sm text-gray-500 dark:text-gray-400 font-light">
+                                <i class="fas fa-user-circle mr-2 text-purple-500"></i>
+                                <span></span>
+                            </div>
+                            <div id="duration" class="flex items-center text-sm text-gray-500 dark:text-gray-400 font-light">
+                                <i class="fas fa-clock mr-2 text-purple-500"></i>
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <button onclick="downloadAudio()" 
+                                class="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 text-white py-5 px-6 rounded-xl transition-all duration-500 flex items-center justify-center space-x-3 font-medium shadow-lg hover:shadow-xl focus:ring-2 focus:ring-green-500/50 animate-gradient">
+                            <i class="fas fa-download text-sm"></i>
+                            <span class="font-display tracking-wide">Download MP3</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        
+        function updateTheme() {
+            if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.theme = 'light';
+            } else {
+                localStorage.theme = 'dark';
+            }
+            updateTheme();
+        });
+
+        updateTheme();
+
+        // Modern Loading Animation Configuration
+        function showLoading(message) {
+            return Swal.fire({
+                html: `
+                    <div class="space-y-6">
+                        <div class="w-24 h-24 mx-auto relative">
+                            <!-- Outer rotating ring -->
+                            <div class="absolute inset-0 rounded-full border-[3px] border-purple-500/20 animate-spin" style="animation-duration: 2s;"></div>
+                            <!-- Middle pulsing circle -->
+                            <div class="absolute inset-2 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 loading-pulse"></div>
+                            <!-- Inner rotating ring -->
+                            <div class="absolute inset-4 rounded-full border-[3px] border-l-blue-500 border-t-purple-500 border-r-pink-500 border-b-transparent animate-spin" style="animation-duration: 1.5s;"></div>
+                            <!-- Center dot -->
+                            <div class="absolute inset-[45%] rounded-full bg-white dark:bg-gray-200"></div>
+                        </div>
+                        <div class="text-gray-600 dark:text-gray-300 text-sm font-display tracking-wide">${message}</div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#ffffff',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl'
+                }
+            });
+        }
+
+        // Enhanced Toast Configuration
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -89,38 +181,27 @@
             }
         });
 
-        function showLoading(message) {
-            return Swal.fire({
-                html: `
-                    <div class="space-y-3">
-                        <div class="w-16 h-16 mx-auto border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-                        <div class="text-gray-600 text-sm">${message}</div>
-                    </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                background: '#ffffff',
+        function showSuccess(message) {
+            Toast.fire({
+                icon: 'success',
+                title: `<span class="font-display">${message}</span>`,
+                background: document.documentElement.classList.contains('dark') ? '#065F46' : '#F0FDF4',
+                iconColor: '#22C55E',
                 customClass: {
                     popup: 'rounded-2xl'
                 }
             });
         }
 
-        function showSuccess(message) {
-            Toast.fire({
-                icon: 'success',
-                title: message,
-                background: '#F0FDF4',
-                iconColor: '#22C55E'
-            });
-        }
-
         function showError(message) {
             Toast.fire({
                 icon: 'error',
-                title: message,
-                background: '#FEF2F2',
-                iconColor: '#EF4444'
+                title: `<span class="font-display">${message}</span>`,
+                background: document.documentElement.classList.contains('dark') ? '#991B1B' : '#FEF2F2',
+                iconColor: '#EF4444',
+                customClass: {
+                    popup: 'rounded-2xl'
+                }
             });
         }
 
@@ -148,7 +229,7 @@
                 success: function(response) {
                     $('#thumbnailContainer').html(`
                         <img src="${response.thumbnail}" alt="Video thumbnail" 
-                             class="w-full object-cover transition-transform duration-300 hover:scale-105">
+                             class="w-full h-full object-cover transition-transform duration-1000 hover:scale-110">
                     `);
                     $('#videoTitle').text(response.title);
                     $('#channelName span').text(response.channel);
@@ -203,20 +284,12 @@
 
         // Smooth page load animation
         document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = '0';
             requestAnimationFrame(() => {
-                document.body.style.opacity = '0';
-                requestAnimationFrame(() => {
-                    document.body.style.transition = 'opacity 0.5s ease-in';
-                    document.body.style.opacity = '1';
-                });
+                document.body.style.transition = 'opacity 0.8s ease-in';
+                document.body.style.opacity = '1';
             });
         });
-
-        // Check system dark mode preference
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
     </script>
-</head>
 </body>
 </html>
