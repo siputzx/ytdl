@@ -95,16 +95,6 @@
     </style>
 </head>
 <body class="bg-[#fafafa] dark:bg-gray-900 min-h-screen transition-colors duration-300">
-    <!-- Theme Toggle -->
-    <div class="fixed top-6 right-6">
-        <button id="themeToggle" class="p-3 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 group">
-            <div class="relative w-6 h-6">
-                <i class="fas fa-sun absolute inset-0 text-amber-400 dark:hidden transform transition-transform duration-500 group-hover:rotate-180"></i>
-                <i class="fas fa-moon absolute inset-0 text-blue-400 hidden dark:inline transform transition-transform duration-500 group-hover:-rotate-180"></i>
-            </div>
-        </button>
-    </div>
-
     <div class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-xl mx-auto space-y-8">
             <!-- Modern Header -->
@@ -115,12 +105,7 @@
                         <div class="relative p-4 rounded-xl bg-white dark:bg-gray-800/80 shadow-lg backdrop-blur-sm group hover:shadow-xl transition-all duration-500">
                             <i class="fab fa-youtube text-red-500 text-3xl group-hover:scale-110 transition-transform duration-500"></i>
                         </div>
-                    </div>
-                    <div class="music-bars text-purple-500">
-                        <div class="bar h-4"></div>
-                        <div class="bar h-2"></div>
-                        <div class="bar h-3"></div>
-                    </div>
+                    </div>                   
                 </div>
                 <h1 class="text-4xl font-semibold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient">
                     Audio Downloader
@@ -209,28 +194,6 @@
     </div>
 
     <script>
-        // Theme Toggle Logic
-        const themeToggle = document.getElementById('themeToggle');
-        
-        function updateTheme() {
-            if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        themeToggle.addEventListener('click', () => {
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.theme = 'light';
-            } else {
-                localStorage.theme = 'dark';
-            }
-            updateTheme();
-        });
-
-        updateTheme();
-
         // Modern Minimalist Loading Configuration
         function showLoading(message) {
             return Swal.fire({
